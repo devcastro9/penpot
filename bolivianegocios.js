@@ -1,8 +1,13 @@
 window.addEventListener('DOMContentLoaded', () => {
   'use strict';
   // Datos de demostración procedentes del HTML original. Campos de precio/pago añadidos para probar filtros.
-  const photos = { cafe: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&auto=format&fit=crop', hardware: 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=600&auto=format&fit=crop', gym: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop', fashion: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&auto=format&fit=crop', tech: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&auto=format&fit=crop' };
-
+  const photos = {
+    cafe: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&auto=format&fit=crop',
+    hardware: 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=600&auto=format&fit=crop',
+    gym: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop',
+    pharmacy: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=600&auto=format&fit=crop',
+    clinic: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&auto=format&fit=crop'
+  };
   const businesses = [
     {
       id: 1,
@@ -13,7 +18,7 @@ window.addEventListener('DOMContentLoaded', () => {
       rating: 4.8,
       reviews: 124,
       distance: 0.5,
-      phone: '+591 71234567',
+      phone: '+591 99999999',
       open: true,
       photo: photos.cafe,
       lat: -19.0333,
@@ -32,7 +37,7 @@ window.addEventListener('DOMContentLoaded', () => {
       rating: 4.6,
       reviews: 98,
       distance: 2.5,
-      phone: '+591 76543210',
+      phone: '+591 99999999',
       open: true,
       photo: photos.hardware,
       lat: -19.0415,
@@ -50,7 +55,7 @@ window.addEventListener('DOMContentLoaded', () => {
       rating: 4.7,
       reviews: 76,
       distance: 1.8,
-      phone: '+591 77778888',
+      phone: '+591 99999999',
       open: null,
       photo: photos.gym,
       lat: -19.0450,
@@ -61,39 +66,39 @@ window.addEventListener('DOMContentLoaded', () => {
     },
     {
       id: 4,
-      name: 'Rincón de Moda',
-      category: 'Tiendas',
-      subcategory: 'Moda',
+      name: 'Farmacia Vida Sana',
+      category: 'Salud y Bienestar',
+      subcategory: 'Farmacias',
       zone: 'Zona Central',
-      rating: 4.5,
-      reviews: 63,
+      rating: 4.7,
+      reviews: 112,
       distance: 0.9,
-      phone: '+591 78889990',
+      phone: '+591 99999999',
       open: true,
-      photo: photos.fashion,
+      photo: photos.pharmacy,
       lat: -19.0365,
       lng: -65.2660,
-      price: 'moderado',
-      payments: ['efectivo', 'qr'],
-      description: 'Ropa y accesorios para todos los estilos.'
+      price: 'economico',
+      payments: ['efectivo', 'qr', 'tarjeta'],
+      description: 'Venta de medicamentos, productos de cuidado personal, vitaminas y artículos de primeros auxilios en Sucre.'
     },
     {
       id: 5,
-      name: 'TecnoSol',
-      category: 'Servicios',
-      subcategory: 'Tecnología',
+      name: 'Clínica Salud Integral',
+      category: 'Salud y Bienestar',
+      subcategory: 'Clínicas',
       zone: 'Zona Terminal',
-      rating: 4.4,
-      reviews: 52,
+      rating: 4.8,
+      reviews: 89,
       distance: 2.1,
-      phone: '+591 73221100',
-      open: null,
-      photo: photos.tech,
+      phone: '+591 99999999',
+      open: true,
+      photo: photos.clinic,
       lat: -19.0280,
       lng: -65.2500,
       price: 'moderado',
       payments: ['efectivo', 'qr', 'tarjeta'],
-      description: 'Soporte informático, mantenimiento y soluciones tecnológicas en Sucre.'
+      description: 'Centro médico con consultas de medicina general, atención especializada, diagnóstico y servicios de salud.'
     }
   ];
 
