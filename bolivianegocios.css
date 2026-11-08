@@ -440,6 +440,13 @@ a {
 }
 
 @media(max-width:767px) {
+  #loginButton,
+  #registerButton {
+    width: 40px;
+    padding: 0;
+    gap: 0
+  }
+
   :root {
     --header: 116px
   }
