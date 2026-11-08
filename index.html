@@ -24,12 +24,11 @@
 <body>
   <header
     class="relative z-[1200] flex flex-wrap items-center gap-3 border-b border-[#253d5e] bg-navy px-4 py-3 text-white shadow-sm md:h-[76px] md:flex-nowrap md:px-5 xl:px-7">
-    <a href="#" id="brand" class="flex shrink-0 items-center gap-2.5" aria-label="BoliviaNegocios, volver al inicio">
+    <a href="#" id="brand" class="flex shrink-0 items-center gap-2.5" aria-label="GuiaCofre, volver al inicio">
       <span
         class="grid h-10 w-10 place-items-center rounded-[13px] bg-gradient-to-br from-[#45a9ff] to-[#146EF5] shadow-lg"><i
           data-lucide="map-pin" class="icon-lg"></i></span>
-      <span class="text-[17px] font-extrabold tracking-[-.7px]">Guia<span
-          class="text-[#8ec6ff]">Cofre</span></span>
+      <span class="text-[17px] font-extrabold tracking-[-.7px]">Guia<span class="text-[#8ec6ff]">Cofre</span></span>
     </a>
     <div class="ml-auto flex items-center gap-2">
       <button id="loginButton" type="button" disabled title="Inicio de sesión: próximamente"
@@ -100,7 +99,7 @@
       <p class="px-5 pb-5 text-[10px] leading-4 text-slate-400">Datos de negocios ilustrativos. Los horarios, distancias
         y reseñas no se verifican en tiempo real.</p>
     </section>
-    <main class="map-pane" id="mapPane" aria-label="Mapa interactivo de negocios en La Paz">
+    <main class="map-pane" id="mapPane" aria-label="Mapa interactivo de negocios">
       <div id="map" aria-label="Mapa de negocios" tabindex="0"></div>
       <div id="mapChips"
         class="pointer-events-none absolute left-4 right-16 top-4 z-[550] flex gap-2 overflow-x-auto pb-2 scroll-slim">
@@ -123,9 +122,9 @@
     class="fixed inset-x-0 bottom-0 z-[2000] flex max-h-[88dvh] flex-col rounded-t-[22px] bg-white shadow-float md:inset-x-auto md:bottom-0 md:right-0 md:top-0 md:max-h-none md:w-[360px] md:rounded-none">
     <div class="mx-auto mt-2 h-1 w-10 rounded-full bg-slate-200 md:hidden"></div>
     <div class="flex items-center justify-between border-b border-line px-5 py-4">
-      <h2 id="drawerTitle" class="text-lg font-extrabold">Filtrar negocios</h2><button id="closeDrawer" type="button"
-        class="grid h-10 w-10 place-items-center rounded-lg hover:bg-surface" aria-label="Cerrar filtros"><i
-          data-lucide="x" class="icon-lg"></i></button>
+      <h2 id="drawerTitle" class="text-lg font-extrabold">Filtrar negocios</h2><button id="closeDrawer"
+        type="button" class="grid h-10 w-10 place-items-center rounded-lg hover:bg-surface"
+        aria-label="Cerrar filtros"><i data-lucide="x" class="icon-lg"></i></button>
     </div>
     <div id="drawerContent" class="scroll-slim flex-1 overflow-auto px-5 py-2"></div>
     <div class="flex gap-3 border-t border-line bg-white p-4"><button class="clearFilters btn btn-secondary flex-1"

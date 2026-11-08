@@ -1,74 +1,73 @@
 window.addEventListener('DOMContentLoaded', () => {
   'use strict';
-  // Datos de demostración procedentes del HTML original. Campos de precio/pago añadidos para probar filtros.
+  // Negocios ficticios de demostración. Ubicaciones, contactos y valoraciones ilustrativos.
   const photos = {
-    cafe: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600&auto=format&fit=crop',
-    hardware: 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=600&auto=format&fit=crop',
-    gym: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&auto=format&fit=crop',
-    pharmacy: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=600&auto=format&fit=crop',
-    clinic: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&auto=format&fit=crop'
+    hospital: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=600&auto=format&fit=crop',
+    clinic: 'https://images.unsplash.com/photo-1551076805-e1869033e561?w=600&auto=format&fit=crop',
+    laboratory: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?w=600&auto=format&fit=crop',
+    pharmacy: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=600&auto=format&fit=crop'
   };
   const businesses = [
     {
       id: 1,
-      name: 'Café Andino',
-      category: 'Restaurantes',
-      subcategory: 'Cafeterías',
+      name: 'Hospital San Gabriel',
+      category: 'Salud',
+      subcategory: 'Hospitales y Clínicas',
       zone: 'Centro Histórico',
       rating: 4.8,
       reviews: 124,
       distance: 0.5,
       phone: '+591 99999999',
       open: true,
-      photo: photos.cafe,
+      photo: photos.hospital,
       lat: -19.0333,
       lng: -65.2627,
       featured: true,
       price: 'moderado',
       payments: ['efectivo', 'qr', 'tarjeta'],
-      description: 'Café de especialidad, repostería artesanal y ambiente acogedor en el Centro Histórico de Sucre.'
+      description: 'Hospital de demostración con servicios de consulta externa, hospitalización y atención de urgencias en Sucre.'
     },
     {
       id: 2,
-      name: 'Ferretería El Constructor',
-      category: 'Tiendas',
-      subcategory: 'Ferreterías',
-      zone: 'Mercado Campesino',
+      name: 'Consultorio Médico La Recoleta',
+      category: 'Salud',
+      subcategory: 'Consultorios y Policonsultorios',
+      zone: 'Zona Recoleta',
       rating: 4.6,
-      reviews: 98,
-      distance: 2.5,
+      reviews: 48,
+      distance: 1.8,
       phone: '+591 99999999',
       open: true,
-      photo: photos.hardware,
-      lat: -19.0415,
-      lng: -65.2490,
+      photo: photos.clinic,
+      lat: -19.0450,
+      lng: -65.2570,
       price: 'economico',
       payments: ['efectivo', 'qr'],
-      description: 'Herramientas, materiales y soluciones para proyectos de construcción.'
+      description: 'Consultorio de demostración dedicado a medicina general, controles preventivos y seguimiento de pacientes.'
     },
     {
       id: 3,
-      name: 'FitZone Gym',
-      category: 'Salud y Bienestar',
-      subcategory: 'Gimnasios',
-      zone: 'Zona Recoleta',
+      name: 'Laboratorio Clínico Diagnóstico Sur',
+      category: 'Salud',
+      subcategory: 'Centros y Laboratorios Clínicos',
+      zone: 'Mercado Campesino',
       rating: 4.7,
       reviews: 76,
-      distance: 1.8,
+      distance: 2.5,
       phone: '+591 99999999',
       open: null,
-      photo: photos.gym,
-      lat: -19.0450,
-      lng: -65.2570,
-      price: 'premium',
+      photo: photos.laboratory,
+      lat: -19.0415,
+      lng: -65.2490,
+      price: 'moderado',
       payments: ['efectivo', 'qr', 'tarjeta'],
-      description: 'Entrenamiento, acondicionamiento físico y bienestar en Sucre.'
+      description: 'Laboratorio de demostración con análisis de sangre, pruebas de bioquímica y toma de muestras clínicas.'
     },
     {
       id: 4,
       name: 'Farmacia Vida Sana',
-      category: 'Salud y Bienestar',
-      subcategory: 'Farmacias',
+      category: 'Salud',
+      subcategory: 'Farmacias y Droguerías',
       zone: 'Zona Central',
       rating: 4.7,
       reviews: 112,
@@ -80,13 +79,13 @@ window.addEventListener('DOMContentLoaded', () => {
       lng: -65.2660,
       price: 'economico',
       payments: ['efectivo', 'qr', 'tarjeta'],
-      description: 'Venta de medicamentos, productos de cuidado personal, vitaminas y artículos de primeros auxilios en Sucre.'
+      description: 'Farmacia de demostración con medicamentos, productos de cuidado personal y artículos de primeros auxilios.'
     },
     {
       id: 5,
       name: 'Clínica Salud Integral',
-      category: 'Salud y Bienestar',
-      subcategory: 'Clínicas',
+      category: 'Salud',
+      subcategory: 'Hospitales y Clínicas',
       zone: 'Zona Terminal',
       rating: 4.8,
       reviews: 89,
@@ -96,18 +95,72 @@ window.addEventListener('DOMContentLoaded', () => {
       photo: photos.clinic,
       lat: -19.0280,
       lng: -65.2500,
-      price: 'moderado',
+      price: 'premium',
       payments: ['efectivo', 'qr', 'tarjeta'],
-      description: 'Centro médico con consultas de medicina general, atención especializada, diagnóstico y servicios de salud.'
+      description: 'Clínica de demostración con consultas especializadas, diagnóstico y servicios de hospitalización.'
+    },
+    {
+      id: 6,
+      name: 'Policonsultorio Familiar Sucre',
+      category: 'Salud',
+      subcategory: 'Consultorios y Policonsultorios',
+      zone: 'Zona San Pedro',
+      rating: 4.5,
+      reviews: 63,
+      distance: 1.4,
+      phone: '+591 99999999',
+      open: null,
+      photo: photos.clinic,
+      lat: -19.0390,
+      lng: -65.2540,
+      price: 'moderado',
+      payments: ['efectivo', 'qr'],
+      description: 'Policonsultorio de demostración con atención de medicina familiar, pediatría y consultas de especialidad.'
+    },
+    {
+      id: 7,
+      name: 'Centro de Diagnóstico Los Álamos',
+      category: 'Salud',
+      subcategory: 'Centros y Laboratorios Clínicos',
+      zone: 'Zona Central',
+      rating: 4.9,
+      reviews: 57,
+      distance: 1.1,
+      phone: '+591 99999999',
+      open: true,
+      photo: photos.laboratory,
+      lat: -19.0305,
+      lng: -65.2680,
+      price: 'premium',
+      payments: ['efectivo', 'qr', 'tarjeta'],
+      description: 'Centro de demostración con estudios de diagnóstico, ecografías y análisis de laboratorio clínico.'
+    },
+    {
+      id: 8,
+      name: 'Droguería San Rafael',
+      category: 'Salud',
+      subcategory: 'Farmacias y Droguerías',
+      zone: 'Zona Terminal',
+      rating: 4.6,
+      reviews: 41,
+      distance: 2.3,
+      phone: '+591 99999999',
+      open: true,
+      photo: photos.pharmacy,
+      lat: -19.0255,
+      lng: -65.2530,
+      price: 'economico',
+      payments: ['efectivo', 'qr'],
+      description: 'Droguería de demostración dedicada a la distribución de productos farmacéuticos e insumos para establecimientos de salud.'
     }
   ];
 
-  const categories = [{ name: 'Restaurantes', color: '#F97316', letter: 'R', icon: 'utensils' }, { name: 'Tiendas', color: '#146EF5', letter: 'T', icon: 'shopping-bag' }, { name: 'Servicios', color: '#0D9488', letter: 'S', icon: 'wrench' }, { name: 'Salud y Bienestar', color: '#A855F7', letter: 'B', icon: 'heart-pulse' }, { name: 'Hoteles', color: '#7C3AED', letter: 'H', icon: 'bed-double' }];
+  const categories = [{ name: 'Salud', color: '#A855F7', letter: 'S', icon: 'heart-pulse' }];
   const categoryByName = new Map(categories.map(category => [category.name, category]));
   const businessById = new Map(businesses.map(business => [business.id, business]));
   const initialView = { center: [-19.0333, -65.2627], zoom: 13 };
   const $ = id => document.getElementById(id); const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const defaultFilters = Object.freeze({ search: '', category: 'all', subcategory: 'all', price: 'all', payment: 'all', open: false, minRating: 'all', sort: 'default', favoritesOnly: false });
+  const defaultFilters = Object.freeze({ search: '', category: 'Salud', subcategory: 'all', price: 'all', payment: 'all', open: false, minRating: 'all', sort: 'default', favoritesOnly: false });
   const state = { ...defaultFilters, selected: null, favorites: new Set(), location: null };
   try { state.favorites = new Set(JSON.parse(localStorage.getItem('bn-favorites') || '[]')) } catch { state.favorites = new Set() }
   const currencyLabel = { economico: 'Económico', moderado: 'Moderado', premium: 'Premium' };
@@ -125,7 +178,7 @@ window.addEventListener('DOMContentLoaded', () => {
           class="h-11 w-full rounded-xl border border-line bg-surface pl-10 pr-3 text-[13px] text-ink outline-none placeholder:text-slate-400 focus:border-[#80b5ff] focus:ring-2 focus:ring-[#80b5ff]/40">
         </div></div>
         <details class="filter-group" open><summary>Ciudad / región ${icon('chevron-down')}</summary><select class="field" aria-label="Ciudad / región" disabled title="Próximamente más ciudades"><option>Sucre · Bolivia</option></select><p class="mt-1.5 text-[10px] text-muted">Por ahora, disponible solo en Sucre.</p></details>
-        <details class="filter-group" open><summary>Categoría ${icon('chevron-down')}</summary><div class="mt-3"><select class="field" data-filter="category" aria-label="Categoría">${choices([['all', 'Todas las categorías'], ...categories.map(c => [c.name, c.name])], state.category)}</select><label class="label mt-3">Subcategoría</label><select class="field" data-filter="subcategory" aria-label="Subcategoría">${choices([['all', 'Todas las subcategorías'], ...subcats().map(s => [s, s])], state.subcategory)}</select></div></details>
+        <details class="filter-group" open><summary>Categoría ${icon('chevron-down')}</summary><div class="mt-3"><select class="field" data-filter="category" aria-label="Categoría" aria-describedby="categoryNote-${target}" disabled>${choices(categories.map(c => [c.name, c.name]), state.category)}</select><p id="categoryNote-${target}" class="mt-1.5 text-[10px] text-muted">Por ahora, solo está disponible la categoría Salud.</p><label class="label mt-3">Subcategoría</label><select class="field" data-filter="subcategory" aria-label="Subcategoría">${choices([['all', 'Todas las subcategorías'], ...subcats().map(s => [s, s])], state.subcategory)}</select></div></details>
         <details class="filter-group" open><summary>Presupuesto y pagos ${icon('chevron-down')}</summary><div class="mt-3"><label class="label">Rango de precios</label><select class="field" data-filter="price">${choices([['all', 'Todos los precios'], ['economico', 'Económico'], ['moderado', 'Moderado'], ['premium', 'Premium']], state.price)}</select><label class="label mt-3">Forma de pago</label><select class="field" data-filter="payment">${choices([['all', 'Cualquier método'], ['efectivo', 'Efectivo'], ['qr', 'QR'], ['tarjeta', 'Tarjeta']], state.payment)}</select></div></details>
         <details class="filter-group" open><summary>Disponibilidad y valoración ${icon('chevron-down')}</summary><div class="mt-3"><label class="check"><input type="checkbox" data-filter="open" ${state.open ? 'checked' : ''}>Abierto ahora <span class="ml-auto text-[10px] text-muted">Demostración</span></label><label class="label mt-3">Calificación mínima</label><select class="field" data-filter="minRating">${choices([['all', 'Cualquiera'], ['4.5', '4.5 estrellas o más'], ['4.7', '4.7 estrellas o más'], ['4.8', '4.8 estrellas o más']], state.minRating)}</select></div></details>
         <details class="filter-group" open><summary>Ordenar resultados ${icon('chevron-down')}</summary><div class="mt-3"><select class="field" data-filter="sort">${choices([['default', 'Más relevantes'], ['rating', 'Mejor valorados'], ['near', 'Más cercanos'], ['name', 'Nombre A–Z']], state.sort)}</select></div></details>`
@@ -159,12 +212,15 @@ window.addEventListener('DOMContentLoaded', () => {
   function renderFilterContainer(id, target) { $(id).innerHTML = filterMarkup(target) }
   function renderFilters() { renderFilterContainer('filterContent', 'desktop'); renderFilterContainer('drawerContent', 'drawer'); }
   function chips() {
-    const data = [state.search && ['Búsqueda: ' + state.search, 'search'], state.category !== 'all' && [state.category, 'category'], state.subcategory !== 'all' && [state.subcategory, 'subcategory'], state.price !== 'all' && [currencyLabel[state.price], 'price'], state.payment !== 'all' && [state.payment.toUpperCase(), 'payment'], state.open && ['Abiertos (demo)', 'open'], state.minRating !== 'all' && ['★ ' + state.minRating + '+', 'minRating'], state.favoritesOnly && ['Favoritos', 'favoritesOnly']].filter(Boolean);
+    const data = [state.search && ['Búsqueda: ' + state.search, 'search'], state.subcategory !== 'all' && [state.subcategory, 'subcategory'], state.price !== 'all' && [currencyLabel[state.price], 'price'], state.payment !== 'all' && [state.payment.toUpperCase(), 'payment'], state.open && ['Abiertos (demo)', 'open'], state.minRating !== 'all' && ['★ ' + state.minRating + '+', 'minRating'], state.favoritesOnly && ['Favoritos', 'favoritesOnly']].filter(Boolean);
     $('activeChips').innerHTML = data.map(([label, key]) => `<button data-remove="${key}" type="button" class="inline-flex min-h-[28px] items-center gap-1 rounded-full border border-[#d2e5ff] bg-[#eff6ff] px-2.5 text-[10px] font-semibold text-[#1754b8]">${esc(label)} ${icon('x')}</button>`).join('');
   }
-  function renderTabs() { const cats = [{ name: 'Todas', value: 'all', icon: 'layout-grid' }, ...categories.map(c => ({ name: c.name, value: c.name, icon: c.icon }))]; $('categoryChips').innerHTML = cats.map(c => `<button type="button" class="pill shadow-soft" data-category="${esc(c.value)}" aria-pressed="${state.category === c.value}">${icon(c.icon)}${esc(c.name)}</button>`).join(''); }
+  function renderTabs() {
+    const tabs = [{ name: 'Todas', value: 'all', icon: 'layout-grid' }, ...subcats().map(name => ({ name, value: name, icon: 'heart-pulse' }))];
+    $('categoryChips').innerHTML = tabs.map(tab => `<button type="button" class="pill shadow-soft" data-subcategory="${esc(tab.value)}" aria-pressed="${state.subcategory === tab.value}">${icon(tab.icon)}${esc(tab.name)}</button>`).join('');
+  }
   function renderCounts(count) {
-    $('resultCount').textContent = `${count} ${count === 1 ? 'negocio encontrado' : 'negocios encontrados'} · Sucre`;
+    $('resultCount').textContent = `${count} ${count === 1 ? 'negocio encontrado' : 'negocios encontrados'}`;
     $('mobileCount').textContent = `(${count})`;
   }
   function renderCards(data) {
@@ -192,7 +248,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     refreshIcons();
   }
-  function setFilter(key, value) { if (key === 'open' || key === 'favoritesOnly') state[key] = Boolean(value); else state[key] = value; if (key === 'category') state.subcategory = 'all'; render({ filters: true }); }
+  function setFilter(key, value) { if (key === 'category') return; if (key === 'open' || key === 'favoritesOnly') state[key] = Boolean(value); else state[key] = value; render({ filters: true }); }
   function toast(text) { const t = $('toast'); clearTimeout(toastTimer); t.textContent = text; t.hidden = false; toastTimer = setTimeout(() => t.hidden = true, 2500) }
   function selectBusiness(id, { pan = true } = {}) { const b = businessById.get(id); if (!b) return; state.selected = id; const data = getResults(); renderCards(data); markerById.forEach((m, mid) => { const found = businessById.get(mid); m.setIcon(markerIcon(found, mid === id)) }); const m = markerById.get(id); if (m) { if (markers.zoomToShowLayer) { markers.zoomToShowLayer(m, () => { if (pan) map.panTo([b.lat, b.lng]); m.openPopup() }) } else { if (pan) map.panTo([b.lat, b.lng]); m.openPopup() } } if (window.innerWidth >= 768) { document.querySelector(`#results [data-business="${id}"]`)?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' }) } refreshIcons(); }
   function reset() { Object.assign(state, defaultFilters, { selected: null }); render({ filters: true }); if (map) { map.setView(initialView.center, initialView.zoom); map.closePopup(); } }
@@ -203,7 +259,7 @@ window.addEventListener('DOMContentLoaded', () => {
   function openInfo(message) { openModal('infoDialog', 'closeInfo'); $('infoMessage').textContent = message }
   function mobileMode(mode) { document.body.classList.toggle('list-mode', mode === 'list'); for (const [id, active] of [['mapMode', mode === 'map'], ['listMode', mode === 'list']]) { const b = $(id); b.setAttribute('aria-pressed', String(active)); b.classList.toggle('bg-[#eaf2ff]', active); b.classList.toggle('text-brand', active); b.classList.toggle('text-muted', !active) } if (mode === 'map' && map) setTimeout(() => map.invalidateSize(), 80) }
   function closeMenu() { $('menu').hidden = true; $('menuButton').setAttribute('aria-expanded', 'false') }
-  document.addEventListener('click', e => { const fav = e.target.closest('[data-favorite]'); if (fav) { e.stopPropagation(); toggleFavorite(Number(fav.dataset.favorite)); return } const remove = e.target.closest('[data-remove]'); if (remove) { const key = remove.dataset.remove; setFilter(key, key === 'open' || key === 'favoritesOnly' ? false : key === 'search' ? '' : 'all'); return } const cat = e.target.closest('[data-category]'); if (cat) { setFilter('category', cat.dataset.category); return } const action = e.target.closest('[data-action]'); if (action) { closeMenu(); if (action.dataset.action === 'reset') reset(); else if (action.dataset.action === 'about') openInfo('Esta versión funciona con 5 negocios de demostración del archivo original. La ubicación y las coordenadas son ilustrativas; horarios, distancias, precios, pagos y calificaciones no son datos verificados en vivo. Para producción se requiere poseer una base de datos y REST API.'); return } const cardEl = e.target.closest('[data-business]'); if (cardEl && !e.target.closest('a,button')) { selectBusiness(Number(cardEl.dataset.business)); if (window.innerWidth < 768 && document.body.classList.contains('list-mode')) mobileMode('map') } });
+  document.addEventListener('click', e => { const fav = e.target.closest('[data-favorite]'); if (fav) { e.stopPropagation(); toggleFavorite(Number(fav.dataset.favorite)); return } const remove = e.target.closest('[data-remove]'); if (remove) { const key = remove.dataset.remove; setFilter(key, key === 'open' || key === 'favoritesOnly' ? false : key === 'search' ? '' : 'all'); return } const subcategory = e.target.closest('[data-subcategory]'); if (subcategory) { setFilter('subcategory', subcategory.dataset.subcategory); return } const action = e.target.closest('[data-action]'); if (action) { closeMenu(); if (action.dataset.action === 'reset') reset(); else if (action.dataset.action === 'about') openInfo('Esta versión funciona con negocios de demostración de la categoría Salud. La ubicación y las coordenadas son ilustrativas; horarios, distancias, precios, pagos y calificaciones no son datos verificados en vivo. Para producción se requiere poseer una base de datos y REST API.'); return } const cardEl = e.target.closest('[data-business]'); if (cardEl && !e.target.closest('a,button')) { selectBusiness(Number(cardEl.dataset.business)); if (window.innerWidth < 768 && document.body.classList.contains('list-mode')) mobileMode('map') } });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); closeModal() } if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-business]')) { e.preventDefault(); selectBusiness(Number(e.target.dataset.business)); if (window.innerWidth < 768) mobileMode('map') } });
   document.addEventListener('change', e => {
     const target = e.target.closest('[data-filter]');
