@@ -158,13 +158,13 @@ window.addEventListener('DOMContentLoaded', () => {
   const categories = [{ name: 'Salud', color: '#A855F7', letter: 'S', icon: 'heart-pulse' }];
   const categoryByName = new Map(categories.map(category => [category.name, category]));
   const businessById = new Map(businesses.map(business => [business.id, business]));
-  const initialView = { center: [-19.0333, -65.2627], zoom: 13 };
+  const initialView = { center: [-65.2627, -19.0333], zoom: 13 };
   const $ = id => document.getElementById(id); const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const defaultFilters = Object.freeze({ search: '', category: 'Salud', subcategory: 'all', price: 'all', payment: 'all', open: false, minRating: 'all', sort: 'default', favoritesOnly: false });
   const state = { ...defaultFilters, selected: null, favorites: new Set(), location: null };
   try { state.favorites = new Set(JSON.parse(localStorage.getItem('bn-favorites') || '[]')) } catch { state.favorites = new Set() }
   const currencyLabel = { economico: 'Económico', moderado: 'Moderado', premium: 'Premium' };
-  let map, markers, userMarker, markerById = new Map(), toastTimer, previousFocus = null;
+  let map, popup, userMarker, toastTimer, previousFocus = null;
   const icon = (name, klass = 'icon-sm') => `<i data-lucide="${name}" class="${klass}"></i>`;
   const refreshIcons = () => { if (window.lucide) lucide.createIcons() };
   const choices = (items, current) => items.map(([value, label]) => `<option value="${esc(value)}" ${current === value ? 'selected' : ''}>${esc(label)}</option>`).join('');
@@ -228,10 +228,73 @@ window.addEventListener('DOMContentLoaded', () => {
     $('results').innerHTML = data.length ? data.map(b => card(b)).join('') : `<div class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center"><div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#eff6ff] text-brand">${icon('search-x', 'icon-lg')}</div><h2 class="mt-4 font-bold">No encontramos coincidencias</h2><p class="mt-2 text-xs leading-5 text-muted">Prueba otra búsqueda o elimina algunos filtros.</p><button class="btn btn-primary mt-5" data-action="reset" type="button">Limpiar filtros</button></div>`;
     $('mobileCards').innerHTML = data.slice(0, 5).map(b => card(b, true)).join(''); $('mobileCards').hidden = !data.length;
   }
-  function markerIcon(b, active) { const c = categoryByName.get(b.category) || categories[0]; return L.divIcon({ className: '', html: `<div class="map-marker ${active ? 'is-active' : ''}" style="background:${c.color}"><span>${c.letter}</span></div>`, iconSize: [42, 42], iconAnchor: [18, 37], popupAnchor: [0, -30] }) }
+  function mapData(data) {
+    return { type: 'FeatureCollection', features: data.map(b => ({ type: 'Feature', id: b.id, geometry: { type: 'Point', coordinates: [b.lng, b.lat] }, properties: { id: b.id, color: (categoryByName.get(b.category) || categories[0]).color } })) };
+  }
+  function updateSelection() {
+    if (!map?.getLayer('business-points')) return;
+    map.setPaintProperty('business-points', 'circle-radius', ['case', ['==', ['get', 'id'], state.selected ?? -1], 20, 16]);
+    map.setPaintProperty('business-points', 'circle-stroke-color', ['case', ['==', ['get', 'id'], state.selected ?? -1], '#146EF5', '#ffffff']);
+  }
+  function showPopup(b) {
+    if (!map) return;
+    popup?.remove();
+    const content = document.createElement('div');
+    const title = document.createElement('strong'); title.textContent = b.name;
+    const details = document.createElement('p'); details.textContent = b.subcategory + ' · ' + b.zone;
+    const rating = document.createElement('p'); rating.textContent = '★ ' + b.rating.toFixed(1) + ' · ' + b.reviews + ' reseñas (demo)';
+    const contact = document.createElement('a'); contact.textContent = 'Contactar por WhatsApp ↗'; contact.href = 'https://wa.me/' + b.phone.replace(/\D/g, ''); contact.target = '_blank'; contact.rel = 'noopener noreferrer'; contact.className = 'text-brand font-bold';
+    content.append(title, details, rating, contact);
+    popup = new mapboxgl.Popup({ offset: 22, maxWidth: '260px' }).setLngLat([b.lng, b.lat]).setDOMContent(content).addTo(map);
+  }
   function renderMap(data) {
-    if (!map) return; markers.clearLayers(); markerById = new Map(); data.forEach(b => { const m = L.marker([b.lat, b.lng], { icon: markerIcon(b, b.id === state.selected), title: b.name, alt: b.name }); m.on('click', () => selectBusiness(b.id, { pan: false })); m.bindPopup(() => `<div style="max-width:220px"><strong style="font-size:13px">${esc(b.name)}</strong><p style="font-size:11px;color:#64748B;margin:6px 0">${esc(b.subcategory)} · ${esc(b.zone)}</p><p style="font-size:11px;margin:0 0 8px">★ ${b.rating.toFixed(1)} · ${b.reviews} reseñas (demo)</p><a style="color:#146EF5;font-weight:700;font-size:12px" href="https://wa.me/${b.phone.replace(/\D/g, '')}" target="_blank" rel="noopener noreferrer">Contactar por WhatsApp ↗</a></div>`); markerById.set(b.id, m); markers.addLayer(m) });
-    if (state.selected && !markerById.has(state.selected)) { state.selected = null; map.closePopup() }
+    if (popup && !data.some(b => b.id === state.selected)) { popup.remove(); popup = null; }
+    const source = map?.getSource('businesses');
+    if (source) { source.setData(mapData(data)); updateSelection(); }
+  }
+  function mapUnavailable(message) {
+    popup?.remove(); popup = null;
+    if (map) { map.remove(); map = null; }
+    $('map').innerHTML = '<div class="grid h-full place-items-center p-8 text-center" role="status"><div><strong>Mapa no disponible</strong><p class="mt-2 text-sm text-muted">' + esc(message) + '</p><button class="btn btn-primary mt-3" onclick="location.reload()">Reintentar</button></div></div>';
+  }
+  function initializeMap() {
+    const token = document.querySelector('meta[name="mapbox-access-token"]')?.content.trim();
+    if (!token || !token.startsWith('pk.')) { mapUnavailable('Configura un token público de Mapbox para mostrar el mapa.'); return; }
+    if (!window.mapboxgl) { mapUnavailable('Comprueba tu conexión y vuelve a cargar la página.'); return; }
+    try {
+      map = new mapboxgl.Map({ container: 'map', accessToken: token, style: 'mapbox://styles/mapbox/streets-v12', center: initialView.center, zoom: initialView.zoom, language: 'es' });
+      map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+      map.on('error', event => {
+        console.error(event.error);
+        const status = event.error?.status;
+        if (status === 401 || status === 403) mapUnavailable('Revisa el token de Mapbox y los dominios autorizados.');
+        else toast('No se pudo cargar parte del mapa. Revisa tu conexión.');
+      });
+      map.on('load', () => {
+        // Hide base-map places while keeping roads and geographic labels.
+        const placeSources = new Set(['poi_label', 'transit_stop_label', 'airport_label']);
+        for (const layer of map.getStyle().layers) {
+          if (layer.type === 'symbol' && placeSources.has(layer['source-layer'])) {
+            map.setLayoutProperty(layer.id, 'visibility', 'none');
+          }
+        }
+        map.addSource('businesses', { type: 'geojson', data: mapData(getResults()), cluster: true, clusterMaxZoom: 14, clusterRadius: 48 });
+        map.addLayer({ id: 'business-clusters', type: 'circle', source: 'businesses', filter: ['has', 'point_count'], paint: { 'circle-color': '#146EF5', 'circle-radius': 21, 'circle-stroke-width': 3, 'circle-stroke-color': '#ffffff' } });
+        map.addLayer({ id: 'business-cluster-count', type: 'symbol', source: 'businesses', filter: ['has', 'point_count'], layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-size': 13 }, paint: { 'text-color': '#ffffff' } });
+        map.addLayer({ id: 'business-points', type: 'circle', source: 'businesses', filter: ['!', ['has', 'point_count']], paint: { 'circle-color': ['get', 'color'], 'circle-radius': 16, 'circle-stroke-width': 3, 'circle-stroke-color': '#ffffff' } });
+        map.addLayer({ id: 'business-labels', type: 'symbol', source: 'businesses', filter: ['!', ['has', 'point_count']], layout: { 'text-field': 'S', 'text-size': 13, 'text-allow-overlap': true }, paint: { 'text-color': '#ffffff' } });
+        map.on('click', 'business-points', event => selectBusiness(Number(event.features[0].properties.id), { pan: false }));
+        map.on('click', 'business-clusters', event => {
+          const feature = event.features[0];
+          map.getSource('businesses').getClusterExpansionZoom(feature.properties.cluster_id, (error, zoom) => { if (!error && map) map.easeTo({ center: feature.geometry.coordinates, zoom }); });
+        });
+        for (const layer of ['business-points', 'business-clusters']) {
+          map.on('mouseenter', layer, () => { map.getCanvas().style.cursor = 'pointer'; });
+          map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = ''; });
+        }
+        updateSelection(); map.resize();
+      });
+    } catch (error) { console.error(error); mapUnavailable('No se pudo iniciar Mapbox. Revisa la conexión y la compatibilidad con WebGL.'); }
   }
   function render({ filters = false } = {}) {
     const data = getResults();
@@ -250,14 +313,20 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function setFilter(key, value) { if (key === 'category') return; if (key === 'open' || key === 'favoritesOnly') state[key] = Boolean(value); else state[key] = value; render({ filters: true }); }
   function toast(text) { const t = $('toast'); clearTimeout(toastTimer); t.textContent = text; t.hidden = false; toastTimer = setTimeout(() => t.hidden = true, 2500) }
-  function selectBusiness(id, { pan = true } = {}) { const b = businessById.get(id); if (!b) return; state.selected = id; const data = getResults(); renderCards(data); markerById.forEach((m, mid) => { const found = businessById.get(mid); m.setIcon(markerIcon(found, mid === id)) }); const m = markerById.get(id); if (m) { if (markers.zoomToShowLayer) { markers.zoomToShowLayer(m, () => { if (pan) map.panTo([b.lat, b.lng]); m.openPopup() }) } else { if (pan) map.panTo([b.lat, b.lng]); m.openPopup() } } if (window.innerWidth >= 768) { document.querySelector(`#results [data-business="${id}"]`)?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' }) } refreshIcons(); }
-  function reset() { Object.assign(state, defaultFilters, { selected: null }); render({ filters: true }); if (map) { map.setView(initialView.center, initialView.zoom); map.closePopup(); } }
+  function selectBusiness(id, { pan = true } = {}) {
+    const b = businessById.get(id); if (!b) return;
+    state.selected = id; renderCards(getResults()); updateSelection();
+    if (map) { if (pan) map.easeTo({ center: [b.lng, b.lat], zoom: Math.max(map.getZoom(), 16) }); showPopup(b); }
+    if (window.innerWidth >= 768) document.querySelector('#results [data-business="' + id + '"]')?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' });
+    refreshIcons();
+  }
+  function reset() { Object.assign(state, defaultFilters, { selected: null }); render({ filters: true }); if (map) { map.jumpTo({ center: initialView.center, zoom: initialView.zoom }); popup?.remove(); popup = null; } }
   function toggleFavorite(id) { if (state.favorites.has(id)) state.favorites.delete(id); else state.favorites.add(id); try { localStorage.setItem('bn-favorites', JSON.stringify([...state.favorites])) } catch { } toast(state.favorites.has(id) ? 'Guardado en favoritos' : 'Eliminado de favoritos'); render() }
   function openModal(modalId, focusId) { previousFocus = document.activeElement; $('overlay').hidden = false; $(modalId).hidden = false; document.body.style.overflow = 'hidden'; $(focusId)?.focus() }
   function openDrawer() { openModal('filterDrawer', 'closeDrawer') }
   function closeModal() { const wasOpen = !$('filterDrawer').hidden || !$('infoDialog').hidden; $('overlay').hidden = true; $('filterDrawer').hidden = true; $('infoDialog').hidden = true; document.body.style.overflow = ''; if (wasOpen) previousFocus?.focus() }
   function openInfo(message) { openModal('infoDialog', 'closeInfo'); $('infoMessage').textContent = message }
-  function mobileMode(mode) { document.body.classList.toggle('list-mode', mode === 'list'); for (const [id, active] of [['mapMode', mode === 'map'], ['listMode', mode === 'list']]) { const b = $(id); b.setAttribute('aria-pressed', String(active)); b.classList.toggle('bg-[#eaf2ff]', active); b.classList.toggle('text-brand', active); b.classList.toggle('text-muted', !active) } if (mode === 'map' && map) setTimeout(() => map.invalidateSize(), 80) }
+  function mobileMode(mode) { document.body.classList.toggle('list-mode', mode === 'list'); for (const [id, active] of [['mapMode', mode === 'map'], ['listMode', mode === 'list']]) { const b = $(id); b.setAttribute('aria-pressed', String(active)); b.classList.toggle('bg-[#eaf2ff]', active); b.classList.toggle('text-brand', active); b.classList.toggle('text-muted', !active) } if (mode === 'map' && map) setTimeout(() => map?.resize(), 80) }
   function closeMenu() { $('menu').hidden = true; $('menuButton').setAttribute('aria-expanded', 'false') }
   document.addEventListener('click', e => { const fav = e.target.closest('[data-favorite]'); if (fav) { e.stopPropagation(); toggleFavorite(Number(fav.dataset.favorite)); return } const remove = e.target.closest('[data-remove]'); if (remove) { const key = remove.dataset.remove; setFilter(key, key === 'open' || key === 'favoritesOnly' ? false : key === 'search' ? '' : 'all'); return } const subcategory = e.target.closest('[data-subcategory]'); if (subcategory) { setFilter('subcategory', subcategory.dataset.subcategory); return } const action = e.target.closest('[data-action]'); if (action) { closeMenu(); if (action.dataset.action === 'reset') reset(); else if (action.dataset.action === 'about') openInfo('Esta versión funciona con negocios de demostración de la categoría Salud. La ubicación y las coordenadas son ilustrativas; horarios, distancias, precios, pagos y calificaciones no son datos verificados en vivo. Para producción se requiere poseer una base de datos y REST API.'); return } const cardEl = e.target.closest('[data-business]'); if (cardEl && !e.target.closest('a,button')) { selectBusiness(Number(cardEl.dataset.business)); if (window.innerWidth < 768 && document.body.classList.contains('list-mode')) mobileMode('map') } });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenu(); closeModal() } if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-business]')) { e.preventDefault(); selectBusiness(Number(e.target.dataset.business)); if (window.innerWidth < 768) mobileMode('map') } });
@@ -294,9 +363,22 @@ window.addEventListener('DOMContentLoaded', () => {
   $('menuButton').addEventListener('click', () => { const hidden = $('menu').hidden; $('menu').hidden = !hidden; $('menuButton').setAttribute('aria-expanded', String(hidden)) });
   document.addEventListener('click', e => { if (!e.target.closest('#menuButton,#menu')) closeMenu() });
   $('mapMode').addEventListener('click', () => mobileMode('map')); $('listMode').addEventListener('click', () => mobileMode('list'));
-  $('locate').addEventListener('click', () => { if (!navigator.geolocation) { toast('La geolocalización no está disponible'); return } const button = $('locate'); button.disabled = true; toast('Consultando tu ubicación…'); navigator.geolocation.getCurrentPosition(pos => { button.disabled = false; state.location = { lat: pos.coords.latitude, lng: pos.coords.longitude }; if (userMarker) map.removeLayer(userMarker); userMarker = L.circleMarker([state.location.lat, state.location.lng], { radius: 9, color: '#fff', weight: 3, fillColor: '#146EF5', fillOpacity: 1 }).addTo(map).bindPopup('Tu ubicación aproximada'); map.setView([state.location.lat, state.location.lng], 14); render(); toast('Ubicación actualizada') }, () => { button.disabled = false; toast('No se pudo obtener la ubicación. Revisa los permisos.') }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }) });
-  try { if (typeof L === 'undefined') throw Error('Leaflet no disponible'); map = L.map('map', { zoomControl: false, preferCanvas: true }).setView(initialView.center, initialView.zoom); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>', maxZoom: 19 }).addTo(map); L.control.zoom({ position: 'topright' }).addTo(map); markers = typeof L.markerClusterGroup === 'function' ? L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 48, iconCreateFunction: cluster => L.divIcon({ html: `<div class="map-cluster">${cluster.getChildCount()}</div>`, className: '', iconSize: [42, 42] }) }) : L.layerGroup(); map.addLayer(markers); render({ filters: true }); setTimeout(() => map.invalidateSize(), 200) } catch (err) { console.error(err); $('map').innerHTML = '<div class="grid h-full place-items-center p-8 text-center"><div><strong>Mapa no disponible</strong><p class="mt-2 text-sm text-muted">Comprueba tu conexión y vuelve a cargar la página.</p><button class="btn btn-primary mt-3" onclick="location.reload()">Reintentar</button></div></div>'; render({ filters: true }); }
-  const updateLayout = () => { const header = document.querySelector('header'); const switcher = $('mobileSwitch'); const reserved = header.getBoundingClientRect().height + (getComputedStyle(switcher).display === 'none' ? 0 : switcher.getBoundingClientRect().height); document.documentElement.style.setProperty('--header', `${Math.ceil(reserved)}px`); if (window.innerWidth >= 768) document.body.classList.remove('list-mode'); if (map) requestAnimationFrame(() => map.invalidateSize()) };
+  $('locate').addEventListener('click', () => {
+    if (!navigator.geolocation) { toast('La geolocalización no está disponible'); return; }
+    const button = $('locate'); button.disabled = true; toast('Consultando tu ubicación…');
+    navigator.geolocation.getCurrentPosition(pos => {
+      button.disabled = false; state.location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      if (map) {
+        userMarker?.remove();
+        userMarker = new mapboxgl.Marker({ color: '#146EF5' }).setLngLat([state.location.lng, state.location.lat]).setPopup(new mapboxgl.Popup({ offset: 25 }).setText('Tu ubicación aproximada')).addTo(map);
+        map.easeTo({ center: [state.location.lng, state.location.lat], zoom: 14 });
+      }
+      render(); toast('Ubicación actualizada');
+    }, () => { button.disabled = false; toast('No se pudo obtener la ubicación. Revisa los permisos.'); }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+  });
+  render({ filters: true });
+  initializeMap();
+  const updateLayout = () => { const header = document.querySelector('header'); const switcher = $('mobileSwitch'); const reserved = header.getBoundingClientRect().height + (getComputedStyle(switcher).display === 'none' ? 0 : switcher.getBoundingClientRect().height); document.documentElement.style.setProperty('--header', `${Math.ceil(reserved)}px`); if (window.innerWidth >= 768) document.body.classList.remove('list-mode'); if (map) requestAnimationFrame(() => map?.resize()) };
   new ResizeObserver(updateLayout).observe(document.querySelector('header'));
   window.addEventListener('resize', updateLayout);
   updateLayout();
