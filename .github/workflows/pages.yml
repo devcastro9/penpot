@@ -1,0 +1,52 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/configure-pages@v5
+      - name: Prepare website
+        env:
+          MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+        run: |
+          mkdir -p _site
+          cp index.html bolivianegocios.css bolivianegocios.js _site/
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          token = os.environ.get('MAPBOX_ACCESS_TOKEN', '').strip()
+          if not token.startswith('pk.'):
+              raise SystemExit('Set the MAPBOX_ACCESS_TOKEN repository secret to a public Mapbox token (pk.).')
+          config = {'mapboxAccessToken': token}
+          Path('_site/config.local.js').write_text(
+              'window.GUIACOFRE_CONFIG = ' + json.dumps(config) + ';\n',
+              encoding='utf-8',
+          )
+          PY
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+

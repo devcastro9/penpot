@@ -258,7 +258,7 @@ window.addEventListener('DOMContentLoaded', () => {
     $('map').innerHTML = '<div class="grid h-full place-items-center p-8 text-center" role="status"><div><strong>Mapa no disponible</strong><p class="mt-2 text-sm text-muted">' + esc(message) + '</p><button class="btn btn-primary mt-3" onclick="location.reload()">Reintentar</button></div></div>';
   }
   function initializeMap() {
-    const token = document.querySelector('meta[name="mapbox-access-token"]')?.content.trim();
+    const token = String(window.GUIACOFRE_CONFIG?.mapboxAccessToken || document.querySelector('meta[name="mapbox-access-token"]')?.content || '').trim();
     if (!token || !token.startsWith('pk.')) { mapUnavailable('Configura un token público de Mapbox para mostrar el mapa.'); return; }
     if (!window.mapboxgl) { mapUnavailable('Comprueba tu conexión y vuelve a cargar la página.'); return; }
     try {
